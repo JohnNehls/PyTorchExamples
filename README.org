@@ -1,0 +1,13 @@
+#+TITLE: PyTorch Examples
+
+The following repository holds simple examples of using PyTorch to accomplish machine learning tasks. This file holds the explanation of each example as well as what was learned during it's creation.
+
+* LR_noDatasetClass.py
+Example using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
+
+[[./fig_LR_noDatasetClass.png]]
+
+*** Learning rates
+- The optimal learning rate is directly connect to how good the initial guess is and how noisy the data is.
+        - If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.
+- With a single learning rate, the slope learned much faster than the bias.
