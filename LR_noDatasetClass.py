@@ -63,9 +63,9 @@ for i in range(iterations):
     
     loss = criterion(yhat, y) #major step 2/3
 
-    error.append(loss.data) #saving data
-
     backward(loss, wlr, blr) #major step 3/3    
+
+    error.append(loss.data) #saving data
 
 #saving data
 params.append([w.data,b.data,iterations])
@@ -78,9 +78,9 @@ print(error)
 
 plt.plot(x.numpy(), y.numpy(), 'k', label="data")
 for param in params:
-    plt.plot(x.numpy(),param[0]*x.numpy()+param[1], label = f'iter # {int(param[2])}')
+    plt.plot(x.numpy(),param[0]*x.numpy()+param[1], label = f'epoch {int(param[2])}')
 plt.legend()
-plt.title("simple linear regression with PyTorch")
+plt.title("gradient descent with PyTorch")
 plt.xlabel('x')
 plt.ylabel('y')
-plt.savefig('fig_LR_noDatasetClass.png')
+plt.savefig('./figs/LR_noDatasetClass.png')

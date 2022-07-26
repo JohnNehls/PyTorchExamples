@@ -5,9 +5,52 @@ The following repository holds simple examples of using PyTorch to accomplish ma
 * LR_noDatasetClass.py
 Example using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
 
-[[./fig_LR_noDatasetClass.png]]
+Simple gradient the via PyTorch's partial derivative.
+#+begin_src python  :results output
+  # tells the tree to calculate the parial derivates of the loss wrt all of the
+  #contriubuting tensors with the "requires_grad = True" in their constructor.
+  loss.backward()
+
+  #gradient descent (with different learning rates)
+  w.data = w.data - wlr*w.grad.data
+  b.data = b.data - blr*b.grad.data
+
+  #must zero out the gradient otherwise pytorch accumulates the gradient.
+  w.grad.data.zero_()
+  b.grad.data.zero_()
+#+end_src
+
+[[./figs/LR_noDatasetClass.png]]
 
 *** Learning rates
 - The optimal learning rate is directly connect to how good the initial guess is and how noisy the data is.
         - If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.
 - With a single learning rate, the slope learned much faster than the bias.
+
+* LR_miniBatch_datasetDataLoader.py
+Using mini-batch gradient descent for linear regression, while also using PyTorches Dataset and DataLoader features.
+#+begin_src python  :results output
+class noisyLineData(Dataset):
+    def __init__(self, N=100, slope=3, intercept=2, stdDev=100):
+        self.x = torch.linspace(-100,100,N)
+        self.y = slope*self.x + intercept + np.random.normal(0, stdDev, N) #can use numpy for random
+
+    def __getitem__(self, index):
+        return self.x[index], self.y[index]
+
+    def __len__(self):
+        return len(self.x)
+
+data = noisyLineData()
+
+trainloader = DataLoader(dataset = data, batch_size = 20)
+#+end_src
+
+[[./figs/LR_miniBatch_datasetDataLoader.png]]
+
+*** Learning rates
+With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster per epoch.
+
+*** Dataset and DataLoader
+- The concepts simple and useful for abstracting out the data.
+- I believe they will be particularly useful when the data is larger we can hold in the machine's memory.
