@@ -8,7 +8,7 @@ from torch import nn, optim
 
 #create noisy data
 class noisyLineData(Dataset):
-    def __init__(self, N=100, slope=3, intercept=2, stdDev=100):
+    def __init__(self, N=100, slope=2, intercept=3, stdDev=50):
         self.x = torch.linspace(-100,100,N).view(-1,1)
         noise = torch.normal( mean=torch.zeros(N), std= stdDev * torch.ones(N) ).view(-1,1)
         self.y = slope*self.x + intercept + noise
@@ -37,7 +37,7 @@ criterion = nn.MSELoss()
 
 model = linear_regression(1,1)
 model.state_dict()['linear.weight'][0] = 0
-model.state_dict()['linear.bias'][0] = -100
+model.state_dict()['linear.bias'][0] = 0 
 
 optimizer = optim.SGD(model.parameters(), lr = 1e-4)
 
@@ -64,11 +64,10 @@ def train_model(epochs):
 
 
 PARAMS, ERROR = train_model(4)
+
 #Simple display of the learning 
-
-
 plt.figure()
-plt.plot(data.x.numpy(), data.y.numpy(), 'k', label="data")
+plt.plot(data.x.numpy(), data.y.numpy(), 'xk', label="data")
 for param in PARAMS:
     plt.plot(data.x.numpy(),param[0]*data.x.numpy()+param[1], label = f'epoch {int(param[2])}')
 plt.legend()

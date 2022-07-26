@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 
 #create noisy data
 class noisyLineData(Dataset):
-    def __init__(self, N=100, slope=3, intercept=2, stdDev=100):
+    def __init__(self, N=100, slope=2, intercept=3, stdDev=50):
         self.x = torch.linspace(-100,100,N) 
         self.y = slope*self.x + intercept + np.random.normal(0, stdDev, N) #can use numpy for random
     
@@ -23,11 +23,10 @@ trainloader = DataLoader(dataset = data, batch_size = 20)
 
 #Global fit parameters w and b, and the prediction vector yhat
 modelParams = {'w': torch.tensor(float(0),requires_grad = True),
-              'b': torch.tensor(float(-100),requires_grad = True)  }
+              'b': torch.tensor(float(0),requires_grad = True)  }
 
 #Learning parameters
-wlr = 1e-4 #learning Rate of slope
-blr = 2e-1 #learning Rate of bias
+lr = 1e-4 #learning Rate 
 epochs = 4 # number of iterations
 
 #general function which use and modify the global parameters
@@ -43,7 +42,7 @@ def criterion(yhat, y):
     
     return torch.mean( ( yhat - y )**2 )
 
-def backward(loss, modelParams, wlr, blr):
+def backward(loss, modelParams, lr):
     """The backward step is the the optimization step. We calculate the gradient of the
     loss w.r.t. the model parameters (w and b) and travel in the negative gradient direction
     to minimize the loss. Simple Gradient Descent. """
@@ -52,9 +51,9 @@ def backward(loss, modelParams, wlr, blr):
     #contriubuting tensors with the "requires_grad = True" in their constructor.
     loss.backward() 
     
-    #gradient descent (with different learning rates)
-    modelParams['w'].data = modelParams['w'].data - wlr * modelParams['w'].grad.data
-    modelParams['b'].data = modelParams['b'].data - blr * modelParams['b'].grad.data
+    #gradient descent 
+    modelParams['w'].data = modelParams['w'].data - lr * modelParams['w'].grad.data
+    modelParams['b'].data = modelParams['b'].data - lr * modelParams['b'].grad.data
     
     #must zero out the gradient otherwise pytorch accumulates the gradient. 
     modelParams['w'].grad.data.zero_()
@@ -78,7 +77,7 @@ for epoch in range(epochs):
 
         error.append(loss.data) #saving data
 
-        backward(loss, modelParams, wlr, blr) #major step 3/3    
+        backward(loss, modelParams, lr) #major step 3/3    
 
 #saving data
 params.append( [modelParams['w'].data, modelParams['b'].data, epochs] )
@@ -91,7 +90,7 @@ print(error)
 print(error_total)
 
 plt.figure()
-plt.plot(data.x.numpy(), data.y.numpy(), 'k', label="data")
+plt.plot(data.x.numpy(), data.y.numpy(), 'xk', label="data")
 for param in params:
     plt.plot(data.x.numpy(),param[0]*data.x.numpy()+param[1], label = f'epoch {int(param[2])}')
 plt.legend()

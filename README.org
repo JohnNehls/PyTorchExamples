@@ -1,35 +1,45 @@
 #+TITLE: PyTorch Examples
+#+OPTIONS: toc:2
 
-The following repository holds simple examples of using PyTorch to accomplish machine learning tasks. This file holds the explanation of each example as well as what was learned during it's creation.
+Welcome to my repository of python scripts which demonstrate PyTorch in simple scenarios. This document  serves as the documentation and guide, where I lightly outline each scenario and present increasingly complex scripts which demonstrate PyTorch's tools.
 
-* Simple Gradient Descent
-[[./LR_noDatasetClass.py][Example sript]] using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
+* Linear Regression
+- The following section shows PyTorch's use of Gradient Descent to fit a line to noisy data set.
+- The standard linear regression naming conventions are used observed  the input data $x$ and $y$, the fit parameter $w$ and bias $b$, and the predicted dependent value,
+  $$\large \hat{y} = w x +b.$$
+- Each regression is found using the mean squared error (MSE),
+  $$\large loss =  \frac{1}{N} \sum ( \hat{y}_i - y_i)^2.$$
+- Each epoch moves the parameters such that the MSE($\hat{y},y)$ is minimized. The epoch 0 line in each figure displays the initial values of the parameters.
+
+
+** Simple Gradient Descent
+[[./LR_noDatasetClass.py][Example script]] using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
 
 Simple gradient the via PyTorch's partial derivative.
 #+begin_src python  :results output
-  # tells the tree to calculate the parial derivates of the loss wrt all of the
-  #contriubuting tensors with the "requires_grad = True" in their constructor.
+  # tells the tree to calculate the partial derivatives of the loss wrt all of the
+  #contributing tensors with the "requires_grad = True" in their constructor.
   loss.backward()
 
   #gradient descent (with different learning rates)
-  w.data = w.data - wlr*w.grad.data
-  b.data = b.data - blr*b.grad.data
+  w.data = w.data - lr*w.grad.data
+  b.data = b.data - lr*b.grad.data
 
-  #must zero out the gradient otherwise pytorch accumulates the gradient.
+  #must zero out the gradient otherwise PyTorch accumulates the gradient.
   w.grad.data.zero_()
   b.grad.data.zero_()
 #+end_src
 
 [[./figs/LR_noDatasetClass.png]]
 
-*** Learning rates
+*** Comments
 - The optimal learning rate is directly connect to how good the initial guess is and how noisy the data is.
-        - If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.
+    - If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.
 - With a single learning rate, the slope learned much faster than the bias.
 
 
-* Mini-Batch Gradient Descent using Dataset and DataLoader
-[[./LR_miniBatch_datasetDataLoader.py][Example script]] using mini-batch gradient descent for linear regression, while also using PyTorches Dataset and DataLoader features.
+** Mini-Batch Gradient Descent using Dataset and DataLoader
+[[./LR_miniBatch_datasetDataLoader.py][Example script]] using mini-batch gradient descent for linear regression, while also using PyTorch's Dataset and DataLoader features.
 #+begin_src python  :results output
 class noisyLineData(Dataset):
     def __init__(self, N=100, slope=3, intercept=2, stdDev=100):
@@ -49,15 +59,12 @@ trainloader = DataLoader(dataset = data, batch_size = 20)
 
 [[./figs/LR_miniBatch_datasetDataLoader.png]]
 
-*** Learning rates
-With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster per epoch.
+*** Comments
+- The *Dataset* and *DataLoader* concepts are simple and useful for abstracting out the data.
+    - I believe they will be particularly useful when the data is larger we can hold in the machine's memory.
+- With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster than Gradient Descent per epoch.
 
-*** Dataset and DataLoader
-- The concepts simple and useful for abstracting out the data.
-- I believe they will be particularly useful when the data is larger we can hold in the machine's memory.
-
-
-* Mini-Batch Gradient Descent the full PyTorch Way
+** Mini-Batch Gradient Descent the full PyTorch Way
 [[./LR_miniBatch_PyTorchWay.py][Example script]] of the same thing, now using nn modules for the model and the optim for optimization (the step):
 #+begin_src python  :results output
 class linear_regression(nn.Module):
@@ -74,10 +81,35 @@ criterion = nn.MSELoss()
 
 model = linear_regression(1,1)
 model.state_dict()['linear.weight'][0] = 0
-model.state_dict()['linear.bias'][0] = -100
+model.state_dict()['linear.bias'][0] = 0
 
 optimizer = optim.SGD(model.parameters(), lr = 1e-4)
 #+end_src
 
-*** Learning Rate
-- Optimizer works excellently for the slope, but I was only allowed to use one learning rate so this script is slower for the example with a bad bias guess than the previous two examples.
+[[./figs/LR_miniBatch_PyTorchway.png]]
+
+*** Comments
+- The optimizer =optim.SGD= works excellently, beating simple mini-batch easily per-epoch.
+
+
+** Multiple Input Output the PyTorch Way
+
+
+* Logistic Regression for Linear Classification
+
+
+* Softmax Regression
+
+
+* Neural Network
+
+
+* Deep Neural Network
+
+
+* Convolutional Neural Network
+
+
+* General PyTorch Notes
+
+** Tensors

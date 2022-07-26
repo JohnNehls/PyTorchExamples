@@ -6,20 +6,19 @@ import matplotlib.pyplot as plt
 
 #create noisy data
 N = 100
-slope = 3
-intercept = 2
-stdDev = 100 #standard deviation of noise
+slope = 2
+intercept = 3
+stdDev = 50 #standard deviation of noise
 x = torch.linspace(-100,100,N) 
 y = slope*x + intercept + np.random.normal(0, stdDev, N) #can use numpy for random
 
 #Global fit parameters w and b, and the prediction vector yhat
 w = torch.tensor(float(0),requires_grad = True) #slope
-b = torch.tensor(float(-100),requires_grad = True) #intercept
+b = torch.tensor(float(0),requires_grad = True) #intercept
 yhat = torch.zeros(N) #prediction
 
 #Learning parameters
-wlr = 1e-4 #learning Rate of slope
-blr = 2e-1 #learning Rate of bias
+lr = 1e-4 #learning Rate
 iterations = 4 # number of iterations
 
 #general function which use and modify the global parameters
@@ -35,7 +34,7 @@ def criterion(yhat, y):
     
     return torch.mean( ( yhat - y )**2 )
 
-def backward(loss, wlr, blr):
+def backward(loss, lr):
     """The backward step is the the optimization step. We calculate the gradient of the
     loss w.r.t. the model parameters (w and b) and travel in the negative gradient direction
     to minimize the loss. Simple Gradient Descent. """
@@ -45,8 +44,8 @@ def backward(loss, wlr, blr):
     loss.backward() 
     
     #gradient descent (with different learning rates)
-    w.data = w.data - wlr*w.grad.data
-    b.data = b.data - blr*b.grad.data
+    w.data = w.data - lr*w.grad.data
+    b.data = b.data - lr*b.grad.data
     
     #must zero out the gradient otherwise pytorch accumulates the gradient. 
     w.grad.data.zero_()
@@ -63,7 +62,7 @@ for i in range(iterations):
     
     loss = criterion(yhat, y) #major step 2/3
 
-    backward(loss, wlr, blr) #major step 3/3    
+    backward(loss, lr) #major step 3/3    
 
     error.append(loss.data) #saving data
 
@@ -76,7 +75,8 @@ error = np.array(error)
 #Simple display of the learning 
 print(error)
 
-plt.plot(x.numpy(), y.numpy(), 'k', label="data")
+plt.figure()
+plt.plot(x.numpy(), y.numpy(), 'xk', label="data")
 for param in params:
     plt.plot(x.numpy(),param[0]*x.numpy()+param[1], label = f'epoch {int(param[2])}')
 plt.legend()
