@@ -1,15 +1,17 @@
+
 #+TITLE: PyTorch Examples
 
-Welcome to my repository of python scripts which demonstrate PyTorch in simple scenarios. This document  serves as the documentation and guide, where I lightly outline each scenario and present increasingly complex scripts which demonstrate PyTorch's tools.
+Welcome to my repository of python scripts which demonstrate PyTorch in simple scenarios. This README  serves as the documentation and guide, where I lightly outline each scenario and present increasingly complex scripts which demonstrate PyTorch's tools.
+
 
 * Linear Regression
 - The following section shows PyTorch's use of Gradient Descent to fit a line to noisy data set.
-- The standard linear regression naming conventions are used observed  the input data $x$ and $y$, the fit parameter $w$ and bias $b$, and the predicted dependent value,
+- The standard linear regression naming conventions are used:  the input data $x$ and $y$, the fit parameter $w$ and bias $b$, and the predicted dependent value,
   $$\large \hat{y} = w x +b.$$
-- Each regression is found using the mean squared error (MSE),
+- Each regression is found using the *mean squared error* (MSE) cost function,
   $$\large loss =  \frac{1}{N} \sum ( \hat{y}_i - y_i)^2.$$
-- Each epoch moves the parameters such that the MSE($\hat{y},y)$ is minimized. The epoch 0 line in each figure displays the initial values of the parameters.
-
+- Each epoch moves the parameters such that the MSE($\hat{y},y)$ is minimized.
+  - Note:  epoch 0 line in each figure displays the initial values of the parameters.
 
 ** Simple Gradient Descent
 [[./LR_noDatasetClass.py][Example script]] using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
@@ -20,7 +22,7 @@ Simple gradient the via PyTorch's partial derivative.
   #contributing tensors with the "requires_grad = True" in their constructor.
   loss.backward()
 
-  #gradient descent (with different learning rates)
+  #gradient descent
   w.data = w.data - lr*w.grad.data
   b.data = b.data - lr*b.grad.data
 
@@ -59,11 +61,11 @@ trainloader = DataLoader(dataset = data, batch_size = 20)
 
 *** Comments
 - The *Dataset* and *DataLoader* concepts are simple and useful for abstracting out the data.
-    - I believe they will be particularly useful when the data is larger we can hold in the machine's memory.
-- With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster than Gradient Descent per epoch.
+    - They will be particularly useful when the data is larger we can hold in the machine's memory.
+- With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster than simple Gradient Descent per epoch.
 
 ** Mini-Batch Gradient Descent the full PyTorch Way
-[[./LR_miniBatch_PyTorchWay.py][Example script]] of the same thing, now using nn modules for the model and the optim for optimization (the step):
+[[./LR_miniBatch_PyTorchWay.py][Example script]] of the same linear regression scenario, now using =nn.modules= for the model and the =optim= for optimization (the step):
 #+begin_src python  :results output
 class linear_regression(nn.Module):
     def __init__(self, input_size, output_size):
@@ -87,7 +89,7 @@ optimizer = optim.SGD(model.parameters(), lr = 1e-4)
 [[./figs/LR_miniBatch_PyTorchway.png]]
 
 *** Comments
-- The optimizer =optim.SGD= works excellently, beating simple mini-batch easily per-epoch.
+- The optimizer =optim.SGD= easily beats mini-batch easily per-epoch.
 
 * Logistic Regression for Linear Classification
 - We map the out put of a line/plane to [0,1] for classification. To do this, we use the sigmoid function,
@@ -97,9 +99,9 @@ $$\Large \sigma(z) = \frac{1}{1+e^{-z}},$$
 as the simple binary function flattens the gradient and thus leads to slow learning.
 
 -  As a prediction we use,
-$$\Large \hat{h}= 1 \text{ if } \sigma(x) >0.5 \text{ else }\hat{y} =0.$$
+$$\Large \hat{y}= 1 \text{ if } \sigma(x) >0.5 \text{ else }\hat{y} =0.$$
 
-- We then use new loss to reflect the predictions, *Cross Entropy Loss*. #TODO
+- We then use new loss to reflect the predictions, *Binary Cross Entropy Loss*.
 
 
 ** Logistic Regression in 1D
@@ -169,7 +171,35 @@ criterion = nn.BCELoss()
 
 
 * Softmax Regression
+- Used to linearly classify between two or more classes.
 
+- Softmax Equation:
+$$\Large S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
+  - where, notably, $S(y_i) \in [0,1]$ and $\sum S(y_i) = 1$
+
+- Softmax relies on the classic =argmax= programming function, $$\hat{y} = argmax_i(S(y_i))$$
+
+- Softmax uses parameter vectors where the dot product is used to classify.
+
+- The complicated part here is the *loss*. How to incentivize this behavior with a decent gradient for learning.
+
+*** Softmax in PyTorch
+
+**** Training
+- When =loss = nn.CrossEntropyLoss()=, PyTorch will automatically use Softmax classification.
+- The cod for training is identical to Linear Regression training-- ignoring data manipulation.
+
+**** Validation
+=argmax= is used to classify the output from the model
+#+begin_src python  :results output
+  for x_validation, y_validation in validation_loader:
+    z = model(x_test)
+    _,yhat = torch.max(z.data,1)
+    correct = correct + ( yhat == y_test ).sum().item()
+
+  accuracy = correct/N_validation
+  accuracy_list.append(accuracy)
+#+end_src
 
 * Neural Network
 
@@ -180,6 +210,40 @@ criterion = nn.BCELoss()
 * Convolutional Neural Network
 
 
-* General PyTorch Notes
+* Notes
+** argmax example:
+- Find three functions, on for each class, where the function that corresponds to each class has the largest value in the region where the class resides.
+  - Then =argmax= is used to retrieve the class designation.
+
+- $z0 = - x$,  $z1 = 1$, and $z2 = x -1$ and $f(x) = [z0(x), z1(x), z2(x)]$,
+  - class 0 for $x \in (-\infty, -1)$
+  - class 1 for $x \in (-1, 2)$
+ - class 2 for $x \in (2, \infty)$
+
+    |       | z0 | z1 | z2 | $\hat{y}$ |
+    | arg   |  0 |  1 |  2 |  argmax   |
+    |-------+----+----+----+-----------|
+    | f(-5) | 10 |  1 | -6 |         0 |
+    | f(1)  | -1 |  1 |  0 |         1 |
+    | f(4)  | -4 |  1 |  3 |         2 |
+
+
+** Definitions
+- *Cost l(w,b)*: average loss
+-
+** PyTorch Modules
+
+*** nn
+
+*** torchvision.transforms
+
+*** torchvision.datasets
+
+
+** Basic outline of a script
+1) Load Data
+2) Create Model
+3) Train Model
+4) View Results
 
 ** Tensors

@@ -9,7 +9,6 @@ from torch import nn, optim
 #set the random seed for the script
 torch.manual_seed(0)
 
-
 #create noisy data
 class noisyLineData(Dataset):
     def __init__(self, N=100, slope=2, intercept=3, stdDev=50):
