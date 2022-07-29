@@ -1,5 +1,4 @@
 #+TITLE: PyTorch Examples
-#+OPTIONS: toc:2
 
 Welcome to my repository of python scripts which demonstrate PyTorch in simple scenarios. This document  serves as the documentation and guide, where I lightly outline each scenario and present increasingly complex scripts which demonstrate PyTorch's tools.
 
@@ -91,15 +90,16 @@ optimizer = optim.SGD(model.parameters(), lr = 1e-4)
 - The optimizer =optim.SGD= works excellently, beating simple mini-batch easily per-epoch.
 
 * Logistic Regression for Linear Classification
-We map the out put of a line/plane to [0,1] for classification. To do this, we use the sigmoid function,
+- We map the out put of a line/plane to [0,1] for classification. To do this, we use the sigmoid function,
 
-$$\Large \sigma(z) = \frac{1}{1+e^{-z}}$$
+$$\Large \sigma(z) = \frac{1}{1+e^{-z}},$$
 
 as the simple binary function flattens the gradient and thus leads to slow learning.
-As a prediction we use,
-$\hat{h}= 1$ if $\sigma(x) >0.5$ else $\hat{y} =0$.
 
-We then use new loss to reflect the predictions, *Cross Entropy Loss*. #TODO
+-  As a prediction we use,
+$$\Large \hat{h}= 1 \text{ if } \sigma(x) >0.5 \text{ else }\hat{y} =0.$$
+
+- We then use new loss to reflect the predictions, *Cross Entropy Loss*. #TODO
 
 
 ** Logistic Regression in 1D
@@ -156,7 +156,7 @@ def criterion(yhat,y):
     return out
 #+end_src
 
-PyTorch's BCELoss fixes this issue by setting $log(0) = \infty$. [[https://pytorch.org/docs/stable/generated/torch.nn.BCELoss.html][See here]] for more details.
+PyTorch's BCELoss fixes this issue by setting $log(0) = -\infty$. See the [[https://pytorch.org/docs/stable/generated/torch.nn.BCELoss.html][BCELoss documentation]].
 #+begin_src python  :results output
 criterion = nn.BCELoss()
 #+end_src

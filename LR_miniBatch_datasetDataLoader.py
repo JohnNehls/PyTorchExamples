@@ -5,6 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 
+#set the random seed for the script
+np.random.seed(0)
+
 #create noisy data
 class noisyLineData(Dataset):
     def __init__(self, N=100, slope=2, intercept=3, stdDev=50):
@@ -62,11 +65,11 @@ def backward(loss, modelParams, lr):
 ##lists to save the parameters and errors
 params = []
 error = []
-error_total = []
+error_epoch = []
 
 for epoch in range(epochs):
     yhat_total = forward(data.x, modelParams)
-    error_total.append(criterion(yhat_total, data.y))
+    error_epoch.append(float(criterion(yhat_total, data.y).data))
 
     params.append([modelParams['w'].data, modelParams['b'].data, epoch]) # saving data    
     # mini-batch or stochastic gradient descent
@@ -87,7 +90,7 @@ error = np.array(error)
 
 #Simple display of the learning 
 print(error)
-print(error_total)
+print(error_epoch)
 
 plt.figure()
 plt.plot(data.x.numpy(), data.y.numpy(), 'xk', label="data")
@@ -101,6 +104,6 @@ plt.savefig('./figs/LR_miniBatch_datasetDataLoader.png')
 
 plt.figure()
 plt.plot(error)
-plt.title("Error")
+plt.title("mini-batch gradient descent with PyTorch")
 plt.xlabel('batch')
-plt.ylabel('error')
+plt.ylabel('Loss')

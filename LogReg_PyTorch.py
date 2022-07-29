@@ -51,7 +51,7 @@ class logistic_regression(nn.Module):
 criterion = nn.BCELoss()
 
 model = logistic_regression(1,1)
-model.state_dict()['linear.weight'][0] = -0.1
+model.state_dict()['linear.weight'][0] = 0.0
 model.state_dict()['linear.bias'][0] = 0.5 
 
 optimizer = optim.SGD(model.parameters(), lr = 2)
@@ -80,16 +80,16 @@ def train_model(epochs):
 PARAMS, ERROR = train_model(1000)
 
 #Simple display of the learning 
-plt.figure(dpi=300)
+plt.figure()
 plt.plot(data.x.numpy(), data.y.numpy(), 'xk', label="data")
 for param in PARAMS:
     if param[2] in [0, 1, 10, 50, 1000]:
         plt.plot(data.x.numpy(),param[0]*data.x.numpy()+param[1], label = f'epoch {int(param[2])}')
-plt.legend()
+plt.legend(loc='upper left')
 plt.title("Logistic Regression with PyTorch")
 plt.xlabel('x')
 plt.ylabel('y')
-plt.ylim([-2,2])
+plt.ylim([-0.5,1.5])
 plt.savefig('./figs/LogReg_PyTorch.png',dpi=300)
 
 

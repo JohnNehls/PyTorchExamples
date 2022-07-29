@@ -4,6 +4,9 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
+#set the random seed for the script
+np.random.seed(0)
+
 #create noisy data
 N = 100
 slope = 2
@@ -52,11 +55,11 @@ def backward(loss, lr):
     b.grad.data.zero_()
 
 ##lists to save the parameters and errors
-params = []
-error = []
+PARAMS = []
+ERROR = []
 
 for i in range(iterations):
-    params.append([w.data,b.data,i]) # saving data
+    PARAMS.append([w.data,b.data,i]) # saving data
     
     yhat = forward(x) #major step 1/3
     
@@ -64,23 +67,27 @@ for i in range(iterations):
 
     backward(loss, lr) #major step 3/3    
 
-    error.append(loss.data) #saving data
+    ERROR.append(loss.data) #saving data
 
 #saving data
-params.append([w.data,b.data,iterations])
-error.append(criterion(yhat, y).data)
-params = np.array(params)
-error = np.array(error)
+PARAMS.append([w.data,b.data,iterations])
+ERROR.append(criterion(yhat, y).data)
+PARAMS = np.array(PARAMS)
+ERROR = np.array(ERROR)
 
-#Simple display of the learning 
-print(error)
-
+#Simple display of the learning
 plt.figure()
 plt.plot(x.numpy(), y.numpy(), 'xk', label="data")
-for param in params:
+for param in PARAMS:
     plt.plot(x.numpy(),param[0]*x.numpy()+param[1], label = f'epoch {int(param[2])}')
 plt.legend()
 plt.title("gradient descent with PyTorch")
 plt.xlabel('x')
 plt.ylabel('y')
 plt.savefig('./figs/LR_noDatasetClass.png')
+
+plt.figure()
+plt.plot(ERROR)
+plt.title("gradient descent with PyTorch")
+plt.xlabel('epoch')
+plt.ylabel('loss')
