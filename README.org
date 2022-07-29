@@ -37,7 +37,6 @@ Simple gradient the via PyTorch's partial derivative.
     - If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.
 - With a single learning rate, the slope learned much faster than the bias.
 
-
 ** Mini-Batch Gradient Descent using Dataset and DataLoader
 [[./LR_miniBatch_datasetDataLoader.py][Example script]] using mini-batch gradient descent for linear regression, while also using PyTorch's Dataset and DataLoader features.
 #+begin_src python  :results output
@@ -91,11 +90,82 @@ optimizer = optim.SGD(model.parameters(), lr = 1e-4)
 *** Comments
 - The optimizer =optim.SGD= works excellently, beating simple mini-batch easily per-epoch.
 
-
-** Multiple Input Output the PyTorch Way
-
-
 * Logistic Regression for Linear Classification
+We map the out put of a line/plane to [0,1] for classification. To do this, we use the sigmoid function,
+
+$$\Large \sigma(z) = \frac{1}{1+e^{-z}}$$
+
+as the simple binary function flattens the gradient and thus leads to slow learning.
+As a prediction we use,
+$\hat{h}= 1$ if $\sigma(x) >0.5$ else $\hat{y} =0$.
+
+We then use new loss to reflect the predictions, *Cross Entropy Loss*. #TODO
+
+
+** Logistic Regression in 1D
+[[./LogReg_PyTorch.py][Example script]]
+Now we use linear regression and with the sigmoid function to find the line/plane/hyperplane between two classes, here [0,1].
+
+#+begin_src python  :results output
+#create noisy data
+class NoisyBinaryData(Dataset):
+    def __init__(self, N=100, x0=-3, x1=5, stdDev=2):
+        xlist = []; ylist = []
+        for i in range(N):
+            #class 0
+            if np.random.rand()<0.5:
+                xlist.append(np.random.normal(x0,stdDev))
+                ylist.append(0.0)
+            #class 1
+            else:
+                xlist.append(np.random.normal(x1,stdDev))
+                ylist.append(1.0)
+
+        self.x = torch.tensor(xlist).view(-1,1)
+        self.y = torch.tensor(ylist).view(-1,1)
+
+    def __getitem__(self, index):
+        return self.x[index], self.y[index]
+
+    def __len__(self):
+        return len(self.x)
+
+np.random.seed(0)
+data = NoisyBinaryData()
+trainloader = DataLoader(dataset = data, batch_size = 20)
+
+# create my "own" linear regression model
+class logistic_regression(nn.Module):
+    def __init__(self, input_size, output_size):
+        #call the super's constructor and use it without having to store it directly.
+        super(logistic_regression, self).__init__()
+        self.linear = nn.Linear(input_size, output_size)
+
+    def forward(self, x):
+        """Prediction"""
+        return torch.sigmoid(self.linear(x))
+
+#+end_src
+
+*** Loss
+The loss is changed so we seperate the data, not fit the data each epoch
+I first used the Cross entropy loss, but had a problem with NANs.
+#+begin_src python  :results output
+def criterion(yhat,y):
+    out = -1 * torch.mean(y * torch.log(yhat) + (1 - y) * torch.log(1 - yhat))
+    return out
+#+end_src
+
+PyTorch's BCELoss fixes this issue by setting $log(0) = \infty$. [[https://pytorch.org/docs/stable/generated/torch.nn.BCELoss.html][See here]] for more details.
+#+begin_src python  :results output
+criterion = nn.BCELoss()
+#+end_src
+
+
+[[./figs/LogReg_PyTorch.png]]
+
+*** Comments
+- line does not simply separate the data as y = 0.5 would do that and not give any prediction power.
 
 
 * Softmax Regression
