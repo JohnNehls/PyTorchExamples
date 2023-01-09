@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-09 Mon 05:55 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PyTorch Examples</title>
+<meta name="author" content="ape" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">PyTorch Examples</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgc2ec2be">Linear Regression</a>
+<ul>
+<li><a href="#orgca2835a">Prediction equation</a></li>
+<li><a href="#orge839076">Optimizing  the Weights with Gradient Descent</a></li>
+<li><a href="#org53aff6b">Choice of Loss function</a></li>
+<li><a href="#org840da1b">Examples in PyTorch</a></li>
+</ul>
+</li>
+<li><a href="#org821ac29">Logistic Regression for Linear Classification</a>
+<ul>
+<li><a href="#org744fe21">Example: Logistic Regression in 1D</a></li>
+</ul>
+</li>
+<li><a href="#org03c1dfb">Softmax Regression</a></li>
+<li><a href="#org1bfe7ef">Neural Network</a></li>
+<li><a href="#org5ba5c1a">Deep Neural Network</a></li>
+<li><a href="#org35e2a47">Convolutional Neural Network</a></li>
+<li><a href="#org8a4a79f">Notes</a>
+<ul>
+<li><a href="#orgd6c1ea7">argmax example:</a></li>
+<li><a href="#orge27d90f">Definitions</a></li>
+<li><a href="#org3aa6974">PyTorch Modules</a></li>
+<li><a href="#org7ee201d">Basic outline of a script</a></li>
+<li><a href="#org7b28dd1">Tensors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+Welcome to my repository of machine learning notes and python scripts, scripts which demonstrate PyTorch in simple scenarios. Each section starts with a terse outline of the learning  method, discuss the relevant python scripts, each integrating PyTorch's library more than the last.
+</p>
+
+<p>
+GitHub does not render the equations well.  Read the web version of this README:  <a href="https://raw.githack.com/JohnNehls/PyTorchExamples/main/README.html">LINK HERE</a>.
+</p>
+
+<div id="outline-container-orgc2ec2be" class="outline-2">
+<h2 id="orgc2ec2be">Linear Regression</h2>
+<div class="outline-text-2" id="text-orgc2ec2be">
+</div>
+<div id="outline-container-orgca2835a" class="outline-3">
+<h3 id="orgca2835a">Prediction equation</h3>
+<div class="outline-text-3" id="text-orgca2835a">
+<p>
+Linear Regression is used to predict a numerical value, \(\hat{y}\), from observations, \(X = \{x_0, x_1,\cdots,  x_{n-1}\}\) with the equation  \[\hat{y}(X) = \sum_{i=0}^{k-1} w_i f_i (X)\]  where the linear name (in linear regression)  comes from the fact that the equation is linear w.r.t. the weights, \(w_i\).
+The combination of function and data point \(f_i (X)\) is called a <b>feature</b>. Features make up the <i>basis</i> for the regression, thus should be unique.
+</p>
+
+<p>
+<b>As long the prediction equation linear combination w.r.t. the weights, the features are up to us!</b>
+</p>
+</div>
+<div id="outline-container-orgdc78631" class="outline-4">
+<h4 id="orgdc78631">Examples</h4>
+<div class="outline-text-4" id="text-orgdc78631">
+<p>
+W can have linear combination of the observations,
+  \[\hat{y} = w_0 x_0 + w_1 x_1 + w_2 x_2 + w_3 x_3\]
+or a linear combination of polynomials on one data point,
+  \[\hat{y} = w_0 + w_1 x + w_2 x^2 + w_3 x^3\],
+even a linear combination of special functions with mixed kernel data points,  \[\hat{y} = w_0 \left( x_0 +x_3 \right) + w_1 arcsin(x_0) + tanh(x_1^2) + w_3 x_0^5\].
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge839076" class="outline-3">
+<h3 id="orge839076">Optimizing  the Weights with Gradient Descent</h3>
+<div class="outline-text-3" id="text-orge839076">
+<p>
+The goal is to have the predictions, \(\hat{y}(X)\), be accurate. This is done by having lots of data, \(\{Y, X \}^i\) which now includes the observed values of the parameter we hope to predict, \(y\), to compare to.
+We do this by minimizing the loss,
+\[loss = \frac{1}{N}\sum_{i=0}^{N-1}\left( y^i - \hat{y}(X^i) \right)^2\],
+where the only free parameters are the weights in \(\hat{y}\). In the linear regression paradigm, the features are chosen  before the optimization. <i>footnote:</i> In deep learning choosing the features is also part of the optimization process.
+</p>
+
+<p>
+<i>footnote:</i> In a linear algebra context, we would consider the fully system as matrix multiplication \[A\bf{x}=\bf{\hat{y}}\], and be concerned whether it was over/under determined and how to <i>regularize</i>. In these notes we expect that the system is over determined (there are more data examples than features).
+</p>
+
+<p>
+In the machine learning context, we calculate the gradient of the loss w.r.t. the weights \(\nabla loss\) and take a <i>step</i> in that direction by updating the weights with
+\[w^{new} = w^{old} + n \nabla loss\]
+where \(n\) is a scalar called the <b>learning rate</b>.
+</p>
+
+<p>
+This is done iteratively, either a number of iteration or until the loss reaches a desired threshold. It must be said that this scheme is a <span class="underline">local</span> minimum finder; it will find a local minimum, but this is necessarily the lowest possible cost, also that the local minimum depends greatly on the starting set of weights.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org53aff6b" class="outline-3">
+<h3 id="org53aff6b">Choice of Loss function</h3>
+<div class="outline-text-3" id="text-org53aff6b">
+<p>
+It should be obvious that the choice of loss function greatly dictates the optimized weights. This is often stated as the crux of machine learning. At this point, we will only point out how it plays out the example of Linear Regression via  a small generalization of our previous loss function,
+</p>
+
+<p>
+\[loss(m) = \frac{1}{N} \sum_{i=0}^{N-1} \left( | y^i - \hat{y}(X^i) | \right)^m\]
+</p>
+
+<p>
+where the larger the value of \(m\), the more large outliers in prediction error \[\left(|y - \hat{y}|\right)\] contribute to the loss and, thus, the higher their priority for minimization during the optimization.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org840da1b" class="outline-3">
+<h3 id="org840da1b">Examples in PyTorch</h3>
+<div class="outline-text-3" id="text-org840da1b">
+<ul class="org-ul">
+<li>The following section shows PyTorch's use of Gradient Descent to fit a line to noisy data set.</li>
+<li>The standard linear regression naming conventions are used:  the input data \(x\) and \(y\), the fit parameter \(w\) and bias \(b\), and the predicted dependent value,
+\[\hat{y} = w x +b.\]</li>
+<li>Each regression is found using the <b>mean squared error</b> (MSE) cost function,
+\[loss =  \frac{1}{N} \sum (  y_i - \hat{y}_i)^2.\]</li>
+<li>Each epoch moves the parameters such that the MSE(\(\hat{y},y)\) is minimized.
+<ul class="org-ul">
+<li>Note:  epoch 0 line in each figure displays the initial values of the parameters.</li>
+</ul></li>
+</ul>
+</div>
+<div id="outline-container-orgb627186" class="outline-4">
+<h4 id="orgb627186">Simple Gradient Descent</h4>
+<div class="outline-text-4" id="text-orgb627186">
+<p>
+<a href="./LR_noDatasetClass.py">Example script</a> using PyTorch for partial derivatives within a simple  linear regression on a  data set with normal noise added. This serves as the first step in using PyTorch as it does not employ any of the other PyTorch features which are the subject of the following examples.
+</p>
+
+<p>
+Simple gradient the via PyTorch's partial derivative.
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">tells the tree to calculate the partial derivatives of the loss wrt all of the</span>
+<span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">contributing tensors with the "requires_grad = True" in their constructor.</span>
+loss.backward<span style="color: #458588;">()</span>
+
+<span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">gradient descent</span>
+w.<span style="color: #83a598;">data</span> = w.data - lr*w.grad.data
+b.<span style="color: #83a598;">data</span> = b.data - lr*b.grad.data
+
+<span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">must zero out the gradient otherwise PyTorch accumulates the gradient.</span>
+w.grad.data.zero_<span style="color: #458588;">()</span>
+b.grad.data.zero_<span style="color: #458588;">()</span>
+</pre>
+</div>
+
+
+<div id="org4af3a7c" class="figure">
+<p><img src="./figs/LR_noDatasetClass.png" alt="LR_noDatasetClass.png" />
+</p>
+</div>
+</div>
+
+<ul class="org-ul">
+<li><a id="org5ad3726"></a>Comments<br />
+<div class="outline-text-5" id="text-org5ad3726">
+<ul class="org-ul">
+<li>The optimal learning rate is directly connect to how good the initial guess is and how noisy the data is.
+<ul class="org-ul">
+<li>If there is a very large loss (error) and a moderate learning rate, the step is possibly too large, leading to an even larger loss and thus an even larger step, etc, until the loss is NA.</li>
+</ul></li>
+<li>With a single learning rate, the slope learned much faster than the bias.</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org34f9528" class="outline-4">
+<h4 id="org34f9528">Mini-Batch Gradient Descent using Dataset and DataLoader</h4>
+<div class="outline-text-4" id="text-org34f9528">
+<p>
+<a href="./LR_miniBatch_datasetDataLoader.py">Example script</a> using mini-batch gradient descent for linear regression, while also using PyTorch's Dataset and DataLoader features.
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #fb4933;">class</span> <span style="color: #d3869b;">noisyLineData</span><span style="color: #458588;">(</span>Dataset<span style="color: #458588;">)</span>:
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__init__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, N=100, slope=3, intercept=2, stdDev=100<span style="color: #458588;">)</span>:
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">x</span> = torch.linspace<span style="color: #458588;">(</span>-100,100,N<span style="color: #458588;">)</span>
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">y</span> = slope*<span style="color: #fb4933;">self</span>.x + intercept + np.random.normal<span style="color: #458588;">(</span>0, stdDev, N<span style="color: #458588;">)</span> <span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">can use numpy for random</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__getitem__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, index<span style="color: #458588;">)</span>:
+        <span style="color: #fb4933;">return</span> <span style="color: #fb4933;">self</span>.x<span style="color: #458588;">[</span>index<span style="color: #458588;">]</span>, <span style="color: #fb4933;">self</span>.y<span style="color: #458588;">[</span>index<span style="color: #458588;">]</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__len__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span><span style="color: #458588;">)</span>:
+        <span style="color: #fb4933;">return</span> <span style="color: #fe8019;">len</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>.x<span style="color: #458588;">)</span>
+
+<span style="color: #83a598;">data</span> = noisyLineData<span style="color: #458588;">()</span>
+
+<span style="color: #83a598;">trainloader</span> = DataLoader<span style="color: #458588;">(</span>dataset = data, batch_size = 20<span style="color: #458588;">)</span>
+</pre>
+</div>
+
+
+<div id="orga15d883" class="figure">
+<p><img src="./figs/LR_miniBatch_datasetDataLoader.png" alt="LR_miniBatch_datasetDataLoader.png" />
+</p>
+</div>
+</div>
+
+<ul class="org-ul">
+<li><a id="org31f7124"></a>Comments<br />
+<div class="outline-text-5" id="text-org31f7124">
+<ul class="org-ul">
+<li>The <b>Dataset</b> and <b>DataLoader</b> concepts are simple and useful for abstracting out the data.
+<ul class="org-ul">
+<li>They will be particularly useful when the data is larger we can hold in the machine's memory.</li>
+</ul></li>
+<li>With the same learning rates as for the full gradient descent, the mini-batch often learned considerably faster than simple Gradient Descent per epoch.</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-orgecd7869" class="outline-4">
+<h4 id="orgecd7869">Mini-Batch Gradient Descent the full PyTorch Way</h4>
+<div class="outline-text-4" id="text-orgecd7869">
+<p>
+<a href="./LR_miniBatch_PyTorchWay.py">Example script</a> of the same linear regression scenario, now using <code>nn.modules</code> for the model and the <code>optim</code> for optimization (the step):
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #fb4933;">class</span> <span style="color: #d3869b;">linear_regression</span><span style="color: #458588;">(</span>nn.Module<span style="color: #458588;">)</span>:
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__init__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, input_size, output_size<span style="color: #458588;">)</span>:
+        <span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">call the super's constructor and use it without having to store it directly.</span>
+        <span style="color: #fe8019;">super</span><span style="color: #458588;">(</span>linear_regression, <span style="color: #fb4933;">self</span><span style="color: #458588;">)</span>.__init__<span style="color: #458588;">()</span>
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">linear</span> = nn.Linear<span style="color: #458588;">(</span>input_size, output_size<span style="color: #458588;">)</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">forward</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, x<span style="color: #458588;">)</span>:
+        <span style="color: #b8bb26;">"""Prediction"""</span>
+        <span style="color: #fb4933;">return</span> <span style="color: #fb4933;">self</span>.linear<span style="color: #458588;">(</span>x<span style="color: #458588;">)</span>
+
+<span style="color: #83a598;">criterion</span> = nn.MSELoss<span style="color: #458588;">()</span>
+
+<span style="color: #83a598;">model</span> = linear_regression<span style="color: #458588;">(</span>1,1<span style="color: #458588;">)</span>
+model.state_dict<span style="color: #458588;">()[</span><span style="color: #b8bb26;">'linear.weight'</span><span style="color: #458588;">][</span>0<span style="color: #458588;">]</span> = 0
+model.state_dict<span style="color: #458588;">()[</span><span style="color: #b8bb26;">'linear.bias'</span><span style="color: #458588;">][</span>0<span style="color: #458588;">]</span> = 0
+
+<span style="color: #83a598;">optimizer</span> = optim.SGD<span style="color: #458588;">(</span>model.parameters<span style="color: #b16286;">()</span>, lr = 1e-4<span style="color: #458588;">)</span>
+</pre>
+</div>
+
+
+<div id="orgae5c3ab" class="figure">
+<p><img src="./figs/LR_miniBatch_PyTorchway.png" alt="LR_miniBatch_PyTorchway.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org07814f1" class="outline-4">
+<h4 id="org07814f1">Comments</h4>
+<div class="outline-text-4" id="text-org07814f1">
+<ul class="org-ul">
+<li>The optimizer <code>optim.SGD</code> easily beats mini-batch easily per-epoch.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org821ac29" class="outline-2">
+<h2 id="org821ac29">Logistic Regression for Linear Classification</h2>
+<div class="outline-text-2" id="text-org821ac29">
+<ul class="org-ul">
+<li>We map the out put of a line/plane to [0,1] for classification. To do this, we use the sigmoid function,</li>
+</ul>
+<p>
+\[\sigma(z) = \frac{1}{1+e^{-z}},\]
+as the simple binary function flattens the gradient and thus leads to slow learning.
+</p>
+
+<ul class="org-ul">
+<li>As a prediction we use,</li>
+</ul>
+<p>
+\[ \hat{y}= 1 \text{ if } \sigma(x) >0.5 \text{ else }\hat{y} =0.\]
+</p>
+
+<ul class="org-ul">
+<li>We then use new loss to reflect the predictions, <b>Binary Cross Entropy Loss</b>.</li>
+</ul>
+</div>
+
+<div id="outline-container-org744fe21" class="outline-3">
+<h3 id="org744fe21">Example: Logistic Regression in 1D</h3>
+<div class="outline-text-3" id="text-org744fe21">
+<p>
+<a href="./LogReg_PyTorch.py">Example script</a>
+Now we use linear regression and with the sigmoid function to find the line/plane/hyperplane between two classes, here [0,1].
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">create noisy data</span>
+<span style="color: #fb4933;">class</span> <span style="color: #d3869b;">NoisyBinaryData</span><span style="color: #458588;">(</span>Dataset<span style="color: #458588;">)</span>:
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__init__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, N=100, x0=-3, x1=5, stdDev=2<span style="color: #458588;">)</span>:
+        <span style="color: #83a598;">xlist</span> = <span style="color: #458588;">[]</span>; <span style="color: #83a598;">ylist</span> = <span style="color: #458588;">[]</span>
+        <span style="color: #fb4933;">for</span> i <span style="color: #fb4933;">in</span> <span style="color: #fe8019;">range</span><span style="color: #458588;">(</span>N<span style="color: #458588;">)</span>:
+            <span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">class 0</span>
+            <span style="color: #fb4933;">if</span> np.random.rand<span style="color: #458588;">()</span>&lt;0.5:
+                xlist.append<span style="color: #458588;">(</span>np.random.normal<span style="color: #b16286;">(</span>x0,stdDev<span style="color: #b16286;">)</span><span style="color: #458588;">)</span>
+                ylist.append<span style="color: #458588;">(</span>0.0<span style="color: #458588;">)</span>
+            <span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">class 1</span>
+            <span style="color: #fb4933;">else</span>:
+                xlist.append<span style="color: #458588;">(</span>np.random.normal<span style="color: #b16286;">(</span>x1,stdDev<span style="color: #b16286;">)</span><span style="color: #458588;">)</span>
+                ylist.append<span style="color: #458588;">(</span>1.0<span style="color: #458588;">)</span>
+
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">x</span> = torch.tensor<span style="color: #458588;">(</span>xlist<span style="color: #458588;">)</span>.view<span style="color: #458588;">(</span>-1,1<span style="color: #458588;">)</span>
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">y</span> = torch.tensor<span style="color: #458588;">(</span>ylist<span style="color: #458588;">)</span>.view<span style="color: #458588;">(</span>-1,1<span style="color: #458588;">)</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__getitem__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, index<span style="color: #458588;">)</span>:
+        <span style="color: #fb4933;">return</span> <span style="color: #fb4933;">self</span>.x<span style="color: #458588;">[</span>index<span style="color: #458588;">]</span>, <span style="color: #fb4933;">self</span>.y<span style="color: #458588;">[</span>index<span style="color: #458588;">]</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__len__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span><span style="color: #458588;">)</span>:
+        <span style="color: #fb4933;">return</span> <span style="color: #fe8019;">len</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>.x<span style="color: #458588;">)</span>
+
+np.random.seed<span style="color: #458588;">(</span>0<span style="color: #458588;">)</span>
+<span style="color: #83a598;">data</span> = NoisyBinaryData<span style="color: #458588;">()</span>
+<span style="color: #83a598;">trainloader</span> = DataLoader<span style="color: #458588;">(</span>dataset = data, batch_size = 20<span style="color: #458588;">)</span>
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">create my "own" linear regression model</span>
+<span style="color: #fb4933;">class</span> <span style="color: #d3869b;">logistic_regression</span><span style="color: #458588;">(</span>nn.Module<span style="color: #458588;">)</span>:
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">__init__</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, input_size, output_size<span style="color: #458588;">)</span>:
+        <span style="color: #7c6f64;">#</span><span style="color: #7c6f64;">call the super's constructor and use it without having to store it directly.</span>
+        <span style="color: #fe8019;">super</span><span style="color: #458588;">(</span>logistic_regression, <span style="color: #fb4933;">self</span><span style="color: #458588;">)</span>.__init__<span style="color: #458588;">()</span>
+        <span style="color: #fb4933;">self</span>.<span style="color: #83a598;">linear</span> = nn.Linear<span style="color: #458588;">(</span>input_size, output_size<span style="color: #458588;">)</span>
+
+    <span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">forward</span><span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>, x<span style="color: #458588;">)</span>:
+        <span style="color: #b8bb26;">"""Prediction"""</span>
+        <span style="color: #fb4933;">return</span> torch.sigmoid<span style="color: #458588;">(</span><span style="color: #fb4933;">self</span>.linear<span style="color: #b16286;">(</span>x<span style="color: #b16286;">)</span><span style="color: #458588;">)</span>
+
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org76c18fe" class="outline-4">
+<h4 id="org76c18fe">Loss</h4>
+<div class="outline-text-4" id="text-org76c18fe">
+<p>
+The loss is changed so we seperate the data, not fit the data each epoch
+I first used the Cross entropy loss, but had a problem with NANs.
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #fb4933;">def</span> <span style="color: #fabd2f;">criterion</span><span style="color: #458588;">(</span>yhat,y<span style="color: #458588;">)</span>:
+    <span style="color: #83a598;">out</span> = -1 * torch.mean<span style="color: #458588;">(</span>y * torch.log<span style="color: #b16286;">(</span>yhat<span style="color: #b16286;">)</span> + <span style="color: #b16286;">(</span>1 - y<span style="color: #b16286;">)</span> * torch.log<span style="color: #b16286;">(</span>1 - yhat<span style="color: #b16286;">)</span><span style="color: #458588;">)</span>
+    <span style="color: #fb4933;">return</span> out
+</pre>
+</div>
+
+<p>
+PyTorch's BCELoss fixes this issue by setting \(log(0) = -\infty\). See the <a href="https://pytorch.org/docs/stable/generated/torch.nn.BCELoss.html">BCELoss documentation</a>.
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #83a598;">criterion</span> = nn.BCELoss<span style="color: #458588;">()</span>
+</pre>
+</div>
+
+
+
+<div id="org5eb2118" class="figure">
+<p><img src="./figs/LogReg_PyTorch.png" alt="LogReg_PyTorch.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7ab83b8" class="outline-4">
+<h4 id="org7ab83b8">Comments</h4>
+<div class="outline-text-4" id="text-org7ab83b8">
+<ul class="org-ul">
+<li>line does not simply separate the data as y = 0.5 would do that and not give any prediction power.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org03c1dfb" class="outline-2">
+<h2 id="org03c1dfb">Softmax Regression</h2>
+<div class="outline-text-2" id="text-org03c1dfb">
+<ul class="org-ul">
+<li>Used to linearly classify between two or more classes.</li>
+
+<li>Softmax Equation:</li>
+</ul>
+<p>
+\[S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}\]
+</p>
+<ul class="org-ul">
+<li>where, notably, \(S(y_i) \in [0,1]\) and \(\sum S(y_i) = 1\)</li>
+</ul>
+<ul class="org-ul">
+<li>Softmax relies on the classic <code>argmax</code> programming function, \[\hat{y} = argmax_i(S(y_i))\]</li>
+
+<li>Softmax uses parameter vectors where the dot product is used to classify.</li>
+
+<li>The complicated part here is the <b>loss</b>. How to incentivize this behavior with a decent gradient for learning.</li>
+</ul>
+</div>
+
+<div id="outline-container-orgc0fb668" class="outline-4">
+<h4 id="orgc0fb668">Softmax in PyTorch</h4>
+<div class="outline-text-4" id="text-orgc0fb668">
+</div>
+<ul class="org-ul">
+<li><a id="org0a8213a"></a>Training<br />
+<div class="outline-text-5" id="text-org0a8213a">
+<ul class="org-ul">
+<li>When <code>loss = nn.CrossEntropyLoss()</code>, PyTorch will automatically use Softmax classification.</li>
+<li>The cod for training is identical to Linear Regression training&#x2013; ignoring data manipulation.</li>
+</ul>
+</div>
+</li>
+
+<li><a id="org5d5405b"></a>Validation<br />
+<div class="outline-text-5" id="text-org5d5405b">
+<p>
+<code>argmax</code> is used to classify the output from the model
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #fb4933;">for</span> x_validation, y_validation <span style="color: #fb4933;">in</span> validation_loader:
+  <span style="color: #83a598;">z</span> = model<span style="color: #458588;">(</span>x_test<span style="color: #458588;">)</span>
+  <span style="color: #83a598;">_</span>,<span style="color: #83a598;">yhat</span> = torch.<span style="color: #fe8019;">max</span><span style="color: #458588;">(</span>z.data,1<span style="color: #458588;">)</span>
+  <span style="color: #83a598;">correct</span> = correct + <span style="color: #458588;">(</span> yhat == y_test <span style="color: #458588;">)</span>.<span style="color: #fe8019;">sum</span><span style="color: #458588;">()</span>.item<span style="color: #458588;">()</span>
+
+<span style="color: #83a598;">accuracy</span> = correct/N_validation
+accuracy_list.append<span style="color: #458588;">(</span>accuracy<span style="color: #458588;">)</span>
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1bfe7ef" class="outline-2">
+<h2 id="org1bfe7ef">Neural Network</h2>
+</div>
+
+<div id="outline-container-org5ba5c1a" class="outline-2">
+<h2 id="org5ba5c1a">Deep Neural Network</h2>
+</div>
+
+<div id="outline-container-org35e2a47" class="outline-2">
+<h2 id="org35e2a47">Convolutional Neural Network</h2>
+</div>
+
+<div id="outline-container-org8a4a79f" class="outline-2">
+<h2 id="org8a4a79f">Notes</h2>
+<div class="outline-text-2" id="text-org8a4a79f">
+</div>
+<div id="outline-container-orgd6c1ea7" class="outline-3">
+<h3 id="orgd6c1ea7">argmax example:</h3>
+<div class="outline-text-3" id="text-orgd6c1ea7">
+<ul class="org-ul">
+<li>Find three functions, on for each class, where the function that corresponds to each class has the largest value in the region where the class resides.
+<ul class="org-ul">
+<li>Then <code>argmax</code> is used to retrieve the class designation.</li>
+</ul></li>
+
+<li><p>
+\(z0 = - x\),  \(z1 = 1\), and \(z2 = x -1\) and \(f(x) = [z0(x), z1(x), z2(x)]\),
+</p>
+<ul class="org-ul">
+<li>class 0 for \(x \in (-\infty, -1)\)</li>
+<li>class 1 for \(x \in (-1, 2)\)</li>
+</ul>
+<ul class="org-ul">
+<li><p>
+class 2 for \(x \in (2, \infty)\)
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-right">z0</th>
+<th scope="col" class="org-right">z1</th>
+<th scope="col" class="org-right">z2</th>
+<th scope="col" class="org-right">\(\hat{y}\)</th>
+</tr>
+
+<tr>
+<th scope="col" class="org-left">arg</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">argmax</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">f(-5)</td>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">-6</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">f(1)</td>
+<td class="org-right">-1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">f(4)</td>
+<td class="org-right">-4</td>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge27d90f" class="outline-3">
+<h3 id="orge27d90f">Definitions</h3>
+<div class="outline-text-3" id="text-orge27d90f">
+<ul class="org-ul">
+<li><b>Cost l(w,b)</b>: average loss</li>
+<li></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3aa6974" class="outline-3">
+<h3 id="org3aa6974">PyTorch Modules</h3>
+<div class="outline-text-3" id="text-org3aa6974">
+</div>
+<div id="outline-container-orgb85666b" class="outline-4">
+<h4 id="orgb85666b">nn</h4>
+</div>
+
+<div id="outline-container-org3fc7959" class="outline-4">
+<h4 id="org3fc7959">torchvision.transforms</h4>
+</div>
+
+<div id="outline-container-org6a61e76" class="outline-4">
+<h4 id="org6a61e76">torchvision.datasets</h4>
+</div>
+</div>
+
+<div id="outline-container-org7ee201d" class="outline-3">
+<h3 id="org7ee201d">Basic outline of a script</h3>
+<div class="outline-text-3" id="text-org7ee201d">
+<ol class="org-ol">
+<li>Load Data</li>
+<li>Create Model</li>
+<li>Train Model</li>
+<li>View Results</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org7b28dd1" class="outline-3">
+<h3 id="org7b28dd1">Tensors</h3>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: ape</p>
+<p class="date">Created: 2023-01-09 Mon 05:55</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
