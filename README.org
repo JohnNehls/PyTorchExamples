@@ -8,8 +8,13 @@ Welcome to my repository of machine learning notes and python scripts, scripts w
 GitHub does not render the equations well.  Read the web version of this README:  [[https://raw.githack.com/JohnNehls/PyTorchExamples/main/README.html][LINK HERE]].
 
 * Linear Regression
+The ubiquitous linear regression is deployed when we can stomach the assumption that the relationship between the features and the target is approximately linear and the noise is "well-behaved" which I believe means it follows a normal distribution.
+
+Minimizing the mean squared error is equivalent to maximum likelihood estimation of a
+linear model under the assumption of additive Gaussian noise. [D2L 3.1.3]
+
 ** Prediction equation
-Linear Regression is used to predict a numerical value, $\hat{y}$, from observations, $X = \{x_0, x_1,\cdots,  x_{n-1}\}$ with the equation  $$\hat{y}(X) = \sum_{i=0}^{k-1} w_i f_i (X)$$  where the linear name (in linear regression)  comes from the fact that the equation is linear w.r.t. the weights, $w_i$.
+Linear Regression is used to predict a numerical value, $\hat{y}$, from observations, $X = \{x_1, x_2, \cdots,  x_{n}\}$ with the equation  $$\hat{y}(X) = \sum_{i=0}^{n} w_i f_i (X)$$  where the linear name (in linear regression)  comes from the fact that the equation is linear w.r.t. the weights, $w_i$.
 The combination of function and data point $f_i (X)$ is called a *feature*. Features make up the /basis/ for the regression, thus should be unique.
 
 *As long the prediction equation linear combination w.r.t. the weights, the features are up to us!*
@@ -19,16 +24,33 @@ W can have linear combination of the observations,
 or a linear combination of polynomials on one data point,
   $$\hat{y} = w_0 + w_1 x + w_2 x^2 + w_3 x^3$$,
 even a linear combination of special functions with mixed kernel data points,  $$\hat{y} = w_0 \left( x_0 +x_3 \right) + w_1 arcsin(x_0) + tanh(x_1^2) + w_3 x_0^5$$.
+*** Choosing the features
+ In the linear regression paradigm, the features are chosen  before the optimization. Thus, the guidance is to  investigation the data and try to find important features. how to do this is beyond the scope of the notes. /footnote:/ In deep learning the features are also learned int he optimization process.
+
+*** Canonical formulation
+The way this prediction equation is usually expressed is that each $x$ is a feature, and the prediction equation can be expressed with linear algebra,
+$$\begin{align}
+\hat{y}(X) &=& w_0\sum_{i=1}^{n} w_i x_i  \\
+                  &=& w_0 + \textbf{w}^T \textbf{x} \\
+                  &=& \textbf{X} \textbf{w} + w_0
+\end{align}$$,
+which clearly shows the linear algebra under the hood ad the expense of leaving out the idea of how the features are formed.
+
+I chose to present it as I did above as it more clearly shows, given a set of data, what we are able to do to come up with an effective model; namely, combine and transform the measurements as we wish.
+
+Regardless of preference, the following material is agnostic to the expression of the prediction equation.
 
 ** Optimizing  the Weights with Gradient Descent
-The goal is to have the predictions, $\hat{y}(X)$, be accurate. This is done by having lots of data, $\{Y, X \}^i$ which now includes the observed values of the parameter we hope to predict, $y$, to compare to.
+The goal is to have the predictions, $\hat{y}(X)$, be accurate. This is done by having, hopefully, lots of data,
+$$\{ y^0, X^0\},\{y^1, X^1\}, \cdots,  \{y^{N-1}, X^{N-1}\}$$
+which now includes the observed values of the parameter we hope to predict, $y$, to compare to.
 We do this by minimizing the loss,
 $$loss = \frac{1}{N}\sum_{i=0}^{N-1}\left( y^i - \hat{y}(X^i) \right)^2$$,
-where the only free parameters are the weights in $\hat{y}$. In the linear regression paradigm, the features are chosen  before the optimization. /footnote:/ In deep learning choosing the features is also part of the optimization process.
+where the only free parameters are the weights in $\hat{y}$.
 
-/footnote:/ In a linear algebra context, we would consider the fully system as matrix multiplication $$A\bf{x}=\bf{\hat{y}}$$, and be concerned whether it was over/under determined and how to /regularize/. In these notes we expect that the system is over determined (there are more data examples than features).
+/footnote:/ In a linear algebra context, we would consider the fully system as matrix multiplication, notionally written $$\bf{\hat{y}} = \textbf{X}\textbf{w}$$, and be concerned whether it was over/under determined and how to /regularize/. In these notes we expect that the system is over determined (there are more data examples than features).
 
-In the machine learning context, we calculate the gradient of the loss w.r.t. the weights $\nabla loss$ and take a /step/ in that direction by updating the weights with
+In the machine learning context, we calculate the gradient of the loss w.r.t. the weights, $\nabla loss$, and take a /step/ in that direction by updating the weights with
 $$w^{new} = w^{old} + n \nabla loss$$
 where $n$ is a scalar called the *learning rate*.
 
