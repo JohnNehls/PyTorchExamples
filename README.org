@@ -3,9 +3,9 @@
 #+OPTIONS: toc:2 num:nil
 #+STARTUP: latexpreview inlineimages
 
-Welcome to my repository of machine learning notes and python scripts, scripts which demonstrate PyTorch in simple scenarios. Each section starts with a terse outline of the learning  method, discuss the relevant python scripts, each integrating PyTorch's library more than the last.
+A repository of machine learning notes and python scripts, scripts which demonstrate PyTorch in simple scenarios. Each section starts with a simple outline of the learning  method, then a discussion on the provided python scripts. The scripts increasingly integrate PyTorch's library.
 
-GitHub does not render the equations well.  Read the web version of this README:  [[https://raw.githack.com/JohnNehls/PyTorchExamples/main/README.html][LINK HERE]].
+GitHub does not render my equations very well.  For a better experience, view the web version of this README:  [[https://raw.githack.com/JohnNehls/PyTorchExamples/main/README.html][LINK HERE]].
 
 * Linear Regression
 The ubiquitous linear regression is deployed when we can stomach the assumption that the relationship between the features and the target is approximately linear and the noise is "well-behaved" which I believe means it follows a normal distribution.
@@ -15,9 +15,8 @@ linear model under the assumption of additive Gaussian noise. [D2L 3.1.3]
 
 ** Prediction equation
 Linear Regression is used to predict a numerical value, $\hat{y}$, from observations, $X = \{x_1, x_2, \cdots,  x_{n}\}$ with the equation  $$\hat{y}(X) = \sum_{i=0}^{n} w_i f_i (X)$$  where the linear name (in linear regression)  comes from the fact that the equation is linear w.r.t. the weights, $w_i$.
-The combination of function and data point $f_i (X)$ is called a *feature*. Features make up the /basis/ for the regression, thus should be unique.
 
-*As long the prediction equation linear combination w.r.t. the weights, the features are up to us!*
+The combination of function and data point $f_i (X)$ is called a *feature*. Features make up the /basis/ for the regression, thus should be unique. *The features are up to us; we most only keep the prediction equation linear  w.r.t. the weights.*
 *** Examples
 W can have linear combination of the observations,
   $$\hat{y} = w_0 x_0 + w_1 x_1 + w_2 x_2 + w_3 x_3$$
@@ -39,6 +38,11 @@ which clearly shows the linear algebra under the hood ad the expense of leaving 
 I chose to present it as I did above as it more clearly shows, given a set of data, what we are able to do to come up with an effective model; namely, combine and transform the measurements as we wish.
 
 Regardless of preference, the following material is agnostic to the expression of the prediction equation.
+
+**** including combinations of features
+There is also a canonical formulation including the set of features $$\psi_{i,j} = x_i \times x_j$$ where we ignore the repeats.
+
+
 
 ** Optimizing  the Weights with Gradient Descent
 The goal is to have the predictions, $\hat{y}(X)$, be accurate. This is done by having, hopefully, lots of data,
@@ -262,6 +266,7 @@ $$S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
 * Convolutional Neural Network
 
 * Notes
+
 ** argmax example:
 - Find three functions, on for each class, where the function that corresponds to each class has the largest value in the region where the class resides.
   - Then =argmax= is used to retrieve the class designation.
@@ -279,8 +284,9 @@ $$S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
     | f(4)  | -4 |  1 |  3 |         2 |
 
 ** Definitions
-- *Cost l(w,b)*: average loss
--
+*** Regularization
+Regularization is "any modification to a deep learning algorithm which is intended to decrease its generalization error but not its training error". ~Goodfellow /et. al./
+
 ** PyTorch Modules
 
 *** nn
@@ -296,9 +302,8 @@ $$S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
 4) View Results
 
 ** Tensors
-
-* Local variables  :noexport:
+* Local variables                                                  :noexport:
 # Local Variables:
 # mode: org
-# eval: (add-hook 'after-save-hook 'jmn-org-export-html-on-save)
+# eval: (add-to-list 'org-files-to-html-on-save (buffer-file-name))
 # end:

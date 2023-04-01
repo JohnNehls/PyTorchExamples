@@ -10,7 +10,7 @@ from torch import nn, optim
 class NoisyBinaryData(Dataset):
     def __init__(self, N=100, x0=-3, x1=5, stdDev=2):                
         xlist = []; ylist = []
-        for i in range(N):
+        for _ in range(N):
             #class 0
             if np.random.rand()<0.5:
                 xlist.append(np.random.normal(x0,stdDev))
