@@ -1,3 +1,4 @@
+# -*- eval: (jmn-export-to-html-on-save) -*-
 #+TITLE: PyTorch Examples
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 #+OPTIONS: toc:2 num:nil
@@ -6,7 +7,6 @@
 A repository of machine learning notes and python scripts, scripts which demonstrate PyTorch in simple scenarios. Each section starts with a simple outline of the learning  method, then a discussion on the provided python scripts. The scripts increasingly integrate PyTorch's library.
 
 GitHub does not render my equations very well.  For a better experience, view the web version of this README:  [[https://raw.githack.com/JohnNehls/PyTorchExamples/main/README.html][LINK HERE]].
-
 * Linear Regression
 The ubiquitous linear regression is deployed when we can stomach the assumption that the relationship between the features and the target is approximately linear and the noise is "well-behaved" which I believe means it follows a normal distribution.
 
@@ -41,7 +41,6 @@ Regardless of preference, the following material is agnostic to the expression o
 
 **** including combinations of features
 There is also a canonical formulation including the set of features $$\psi_{i,j} = x_i \times x_j$$ where we ignore the repeats.
-
 
 
 ** Optimizing  the Weights with Gradient Descent
@@ -228,7 +227,8 @@ criterion = nn.BCELoss()
 *** Comments
 - line does not simply separate the data as y = 0.5 would do that and not give any prediction power.
 
-* Softmax Regression
+* Neural Network
+** Softmax Classifier
 - Used to linearly classify between two or more classes.
 
 - Softmax Equation:
@@ -241,13 +241,48 @@ $$S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
 
 - The complicated part here is the *loss*. How to incentivize this behavior with a decent gradient for learning.
 
-*** Softmax in PyTorch
+**** Softmax in PyTorch
+Example: [[./softMax_linLayer_makemore.md]], which can be opened in python via the file with the .py extension or converted to a Jupyter Notebook by executing:
 
-**** Training
+#+begin_src shell
+jupytext softMax_linLayer_makemore.py -o softMax_linLayer_makemore.ipynb
+#+end_src
+
+Excerpt:
+#+begin_src python  :results output
+epochs = 10000 # decrease if not using a GPU! Takes about 1min with an rtx 4 series
+
+for i in range(epochs):
+    # Learning rate decreases from lr_start-> lr_end over epochs
+    # It is generally a good idea to reduce the learning rate like this
+    lr_start, lr_end = 100, 10
+    lr = lr_start - (lr_start-lr_end)*i/epochs
+
+    logit = xenc @ W # log counts
+    counts = logit.exp()
+    probs = counts/counts.sum(1,keepdim=True)
+
+    """
+    Kaparthy's Loss: log of the probabilities of correct pediction, log, negate, mean
+    This drives the exact element we want be 1 nearer to it.
+    - works much better than niave loss function
+    """
+    loss = -probs[torch.arange(num),ys].log().mean()
+
+    print(f'epoch: {i:04d},  lr: {lr:.3e}, loss: {loss}')
+
+    W.grad = None
+    loss.backward()
+
+    W.data += -lr*W.grad
+    W.grad.data.zero_()
+#+end_src
+
+***** Training
 - When =loss = nn.CrossEntropyLoss()=, PyTorch will automatically use Softmax classification.
 - The cod for training is identical to Linear Regression training-- ignoring data manipulation.
 
-**** Validation
+***** Validation
 =argmax= is used to classify the output from the model
 #+begin_src python  :results output
   for x_validation, y_validation in validation_loader:
@@ -258,8 +293,6 @@ $$S(y_i) = \frac{exp(y_i)}{\sum exp(y_j)}$$
   accuracy = correct/N_validation
   accuracy_list.append(accuracy)
 #+end_src
-
-* Neural Network
 
 * Deep Neural Network
 
