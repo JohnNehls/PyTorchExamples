@@ -248,6 +248,11 @@ Example: [[./softMax_linLayer_makemore.md]], which can be opened in python via t
 jupytext softMax_linLayer_makemore.py -o softMax_linLayer_makemore.ipynb
 #+end_src
 
+As a side note, the Markdown is created with the following:
+#+begin_src shell
+jupytext softMax_linLayer_makemore.py -o softMax_linLayer_makemore.md
+#+end_src
+
 Excerpt:
 #+begin_src python  :results output
 epochs = 10000 # decrease if not using a GPU! Takes about 1min with an rtx 4 series

@@ -105,6 +105,22 @@ ys = ys.to(device)
 All cells above must be run for any of the flollowing training cells to run successfully. 
 
 
+#### On Logits and SoftMax
+By ChatGPT 3.5
+
+In machine learning, the term "logit" typically refers to the output of a logistic regression model before it is transformed into a probability. Logits represent the raw, unbounded values that indicate the model's prediction for each class.
+
+Logistic regression is a binary classification algorithm that models the relationship between the input features and the probability of a binary outcome. The logistic regression model applies a linear transformation to the input features, followed by the application of a sigmoid function (also known as the logistic function) to squash the output into the range [0, 1]. The sigmoid function maps the logits to probabilities, which can be interpreted as the likelihood of the positive class.
+
+However, during the training process, it is often more convenient to work with logits instead of probabilities. Logits can be easily interpreted as a measure of the evidence for or against a particular class. Higher positive logits indicate stronger evidence for the positive class, while lower negative logits indicate stronger evidence for the negative class.
+
+To convert logits into probabilities, an exponential function known as the softmax function is commonly used. The softmax function takes the logits as input and produces a probability distribution over all possible classes. It exponentiates the logits and normalizes them to sum up to 1, ensuring that the resulting values represent valid probabilities.
+
+The softmax function is preferred because it ensures that the predicted probabilities are non-negative and sum up to 1, which is desirable for many applications such as multi-class classification. Additionally, the exponential function amplifies the differences between logits, making the model's predictions more distinct and interpretable.
+
+While the softmax function is the most widely used function to convert logits to probabilities, there are alternative functions that can be used depending on the specific requirements of the problem. For example, in some cases, the sigmoid function may be used for binary classification tasks, where there are only two classes. Other functions like the softmax temperature scaling or the Boltzmann distribution can be applied to adjust the shape and temperature of the probabilities. These alternatives may have specific use cases, but the softmax function remains the standard choice in most scenarios.
+
+
 ### Pedantic Examples
 Each onsiders each individual example--useful for learning the process, but too slow to be usable. 
 
@@ -263,7 +279,8 @@ for i in range(10):
     nextchar=''
     
     while nextchar  != '.':
-        nextchar = np.random.choice(chars, p=weightsN[next,:])
+        #note: weightsN[next] is equivalent to onehot(next) @ weightsN
+        nextchar = np.random.choice(chars, p=weightsN[next]) 
         genWord+=nextchar
         next = ctoi[nextchar]
 
